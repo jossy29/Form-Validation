@@ -1,128 +1,115 @@
 const form = document.getElementById('form');
-const username = document.getElementById('username');
-const title = document.getElementById('title');
-const email = document.getElementById('email');
-const password = document.getElementById('password');
-const password2 = document.getElementById('password2');
-const signupBtn = document.getElementById('signupbtn');
-const signinBtn = document.getElementById('signinbtn');
-const fBtn = document.getElementById('fbtn');
+const firstname_input = document.getElementById('Firstname-input');
+const email_input = document.getElementById('email-input');
+const password_input = document.getElementById('password-input');
+const repeat_password = document.getElementById('repeat-password');
+const error_messageS = document.getElementById('error-message');
 
-// Track form mode: sign up (default) or sign in
-let isSignUp = true;
-
+// Handle form submission for both sign up and sign in
 form.addEventListener('submit', (e) => {
-    e.preventDefault();
+   e.preventDefault();  // Prevent form submission to show validation messages
 
-    if (isSignUp) {
-        validateInputs();
+   let errors = []
+
+   // Check if this is a signup form (check if the first name field exists)
+   if(firstname_input){
+       errors = getSignupFormErrors(firstname_input.value, email_input.value, password_input.value, repeat_password.value)
+   }
+   // If it's a login form, run the login validation
+   else{
+       errors = getLoginFormErrors(email_input.value, password_input.value)
+   }
+
+   // Show errors or allow form submission
+   if(errors.length > 0) {
+       error_messageS.innerText = errors.join(". ") 
+   } else {
+       // If no errors, submit the form (remove error display)
+       error_messageS.innerText = '';
+       form.submit();  
+   }
+});
+
+// Signup validation function
+function getSignupFormErrors(firstname, email, password, repeatPassword){
+    let errors = []
+
+    // First name validation
+    if(firstname === '' || firstname == null) {
+        errors.push('Firstname is required');
+        firstname_input.parentElement.classList.add('incorrect');
     } else {
-        // Handle sign in logic here
-        if (email.value.trim() === '' || password.value.trim() === '') {
-            alert('Please enter both email and password to sign in.');
-        } else {
-            alert('Sign In successful (fake alert)');
+        firstname_input.parentElement.classList.remove('incorrect');
+    }
+
+    // Email validation
+    if(email === '' || email == null) {
+        errors.push('Email is required');
+        email_input.parentElement.classList.add('incorrect');
+    } else if (!validateEmail(email)) {
+        errors.push('Please enter a valid email address');
+        email_input.parentElement.classList.add('incorrect');
+    } else {
+        email_input.parentElement.classList.remove('incorrect');
+    }
+
+    // Password validation
+    if(password === '' || password == null) {
+        errors.push('Password is required');
+        password_input.parentElement.classList.add('incorrect');
+    } else {
+        password_input.parentElement.classList.remove('incorrect');
+    }
+
+    // Repeat password validation
+    if(repeatPassword !== password) {
+        errors.push('Passwords do not match');
+        repeat_password.parentElement.classList.add('incorrect');
+    } else {
+        repeat_password.parentElement.classList.remove('incorrect');
+    }
+
+    return errors;
+}
+
+// Login validation function
+function getLoginFormErrors(email, password){
+    let errors = []
+
+    if(email === '' || email == null) {
+        errors.push('Email is required');
+        email_input.parentElement.classList.add('incorrect');
+    }
+
+    if(password === '' || password == null) {
+        errors.push('Password is required');
+        password_input.parentElement.classList.add('incorrect');
+    }
+    if(password.length < 8) {
+        errors.push('Password must have at least 8 characters')
+        password_input.parentElement.classList.add('incorrect')
+    }
+    if(password !== repeatPassword) {
+        errors.push('Password does not match repeated password');
+        password_input.parentElement.classList.add('incorrect');
+        repeat_password.parentElement.classList.add('incorrect');
+    }
+
+    return errors;
+}
+
+// Email validation helper function
+function validateEmail(email) {
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return regex.test(email);
+}
+
+const allInputs = [firstname_input, email_input, password_input, repeat_password] 
+allInputs.forEach(input => {
+    input.addEventListener('input', () => {
+        if(input.parentElement.classList.contains('incorrect')){
+            input.parentElement.classList.remove('incorrect')
+            error_message.innerText = ''
         }
-    }
-});
-
-const setError = (element, message) => {
-    const inputControl = element.parentElement;
-    const errorDisplay = inputControl.querySelector('.error');
-
-    errorDisplay.innerText = message;
-    inputControl.classList.add('error');
-    inputControl.classList.remove('success');
-};
-
-const setSuccess = (element) => {
-    const inputControl = element.parentElement;
-    const errorDisplay = inputControl.querySelector('.error');
-
-    errorDisplay.innerText = '';
-    inputControl.classList.add('success');
-    inputControl.classList.remove('error');
-};
-
-const isValidEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
-};
-
-const validateInputs = () => {
-    const usernameValue = username.value.trim();
-    const emailValue = email.value.trim();
-    const passwordValue = password.value.trim();
-    const password2Value = password2.value.trim();
-
-    let isValid = true;
-
-    if (usernameValue === '') {
-        setError(username, 'Username is required');
-        isValid = false;
-    } else {
-        setSuccess(username);
-    }
-
-    if (emailValue === '') {
-        setError(email, 'Email is required');
-        isValid = false;
-    } else if (!isValidEmail(emailValue)) {
-        setError(email, 'Provide a valid email address');
-        isValid = false;
-    } else {
-        setSuccess(email);
-    }
-
-    if (passwordValue === '') {
-        setError(password, 'Password is required');
-        isValid = false;
-    } else if (passwordValue.length < 8) {
-        setError(password, 'Password must be at least 8 characters');
-        isValid = false;
-    } else {
-        setSuccess(password);
-    }
-
-    if (password2Value === '') {
-        setError(password2, 'Please confirm your password');
-        isValid = false;
-    } else if (password2Value !== passwordValue) {
-        setError(password2, "Passwords don't match");
-        isValid = false;
-    } else {
-        setSuccess(password2);
-    }
-
-    if (isValid) {
-        alert('Registration Successful (fake alert)');
-        form.reset();
-        document.querySelectorAll('.input-control').forEach(el => {
-            el.classList.remove('success');
-        });
-    }
-};
-
-// Toggle to Sign In mode
-signinBtn.addEventListener('click', () => {
-    isSignUp = false;
-    title.innerText = 'Sign In';
-    signupBtn.innerText = 'Sign In';
-    fBtn.classList.remove('disable');
-
-    username.parentElement.style.display = 'none';
-    password2.parentElement.style.display = 'none';
-});
-
-// Toggle to Sign Up mode
-signupBtn.addEventListener('click', () => {
-    if (!isSignUp) {
-        isSignUp = true;
-        title.innerText = 'Registration';
-        signupBtn.innerText = 'Sign Up';
-        fBtn.classList.add('disable');
-
-        username.parentElement.style.display = 'flex';
-        password2.parentElement.style.display = 'flex';
-    }
-});
+    })
+}) 
