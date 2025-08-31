@@ -9,20 +9,20 @@ const error_messageS = document.getElementById('error-message');
 form.addEventListener('submit', (e) => {
    e.preventDefault();  // Prevent form submission to show validation messages
 
-   let errors = []
+   let errors = [];
 
    // Check if this is a signup form (check if the first name field exists)
-   if(firstname_input){
-       errors = getSignupFormErrors(firstname_input.value, email_input.value, password_input.value, repeat_password.value)
+   if (firstname_input) {
+       errors = getSignupFormErrors(firstname_input.value, email_input.value, password_input.value, repeat_password ? repeat_password.value : '');
    }
    // If it's a login form, run the login validation
-   else{
-       errors = getLoginFormErrors(email_input.value, password_input.value)
+   else {
+       errors = getLoginFormErrors(email_input.value, password_input.value);
    }
 
    // Show errors or allow form submission
-   if(errors.length > 0) {
-       error_messageS.innerText = errors.join(". ") 
+   if (errors.length > 0) {
+       error_messageS.innerText = errors.join(". ");
    } else {
        // If no errors, submit the form (remove error display)
        error_messageS.innerText = '';
@@ -32,10 +32,10 @@ form.addEventListener('submit', (e) => {
 
 // Signup validation function
 function getSignupFormErrors(firstname, email, password, repeatPassword){
-    let errors = []
+    let errors = [];
 
     // First name validation
-    if(firstname === '' || firstname == null) {
+    if (firstname === '' || firstname == null) {
         errors.push('Firstname is required');
         firstname_input.parentElement.classList.add('incorrect');
     } else {
@@ -43,7 +43,7 @@ function getSignupFormErrors(firstname, email, password, repeatPassword){
     }
 
     // Email validation
-    if(email === '' || email == null) {
+    if (email === '' || email == null) {
         errors.push('Email is required');
         email_input.parentElement.classList.add('incorrect');
     } else if (!validateEmail(email)) {
@@ -54,7 +54,7 @@ function getSignupFormErrors(firstname, email, password, repeatPassword){
     }
 
     // Password validation
-    if(password === '' || password == null) {
+    if (password === '' || password == null) {
         errors.push('Password is required');
         password_input.parentElement.classList.add('incorrect');
     } else {
@@ -62,7 +62,7 @@ function getSignupFormErrors(firstname, email, password, repeatPassword){
     }
 
     // Repeat password validation
-    if(repeatPassword !== password) {
+    if (repeatPassword !== password) {
         errors.push('Passwords do not match');
         repeat_password.parentElement.classList.add('incorrect');
     } else {
@@ -74,25 +74,18 @@ function getSignupFormErrors(firstname, email, password, repeatPassword){
 
 // Login validation function
 function getLoginFormErrors(email, password){
-    let errors = []
+    let errors = [];
 
-    if(email === '' || email == null) {
+    // Email validation
+    if (email === '' || email == null) {
         errors.push('Email is required');
         email_input.parentElement.classList.add('incorrect');
     }
 
-    if(password === '' || password == null) {
+    // Password validation
+    if (password === '' || password == null) {
         errors.push('Password is required');
         password_input.parentElement.classList.add('incorrect');
-    }
-    if(password.length < 8) {
-        errors.push('Password must have at least 8 characters')
-        password_input.parentElement.classList.add('incorrect')
-    }
-    if(password !== repeatPassword) {
-        errors.push('Password does not match repeated password');
-        password_input.parentElement.classList.add('incorrect');
-        repeat_password.parentElement.classList.add('incorrect');
     }
 
     return errors;
@@ -104,12 +97,13 @@ function validateEmail(email) {
     return regex.test(email);
 }
 
-const allInputs = [firstname_input, email_input, password_input, repeat_password] 
+// Add event listener for input change to remove error styles
+const allInputs = [firstname_input, email_input, password_input, repeat_password].filter(input => input != null);
 allInputs.forEach(input => {
     input.addEventListener('input', () => {
-        if(input.parentElement.classList.contains('incorrect')){
-            input.parentElement.classList.remove('incorrect')
-            error_message.innerText = ''
+        if (input.parentElement.classList.contains('incorrect')) {
+            input.parentElement.classList.remove('incorrect');
+            error_messageS.innerText = '';
         }
-    })
-}) 
+    });
+});
